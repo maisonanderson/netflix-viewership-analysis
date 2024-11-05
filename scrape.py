@@ -3,10 +3,12 @@ import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 
-
 def scrape_netflix_articles(url="https://about.netflix.com/en/newsroom?search=what%2520we%2520watched", exports_folder='exports'):
     # Create the exports directory if it doesn't exist
     os.makedirs(exports_folder, exist_ok=True)
+
+    # Initialize a list to store the results
+    articles_data = []
 
     # Set headers to mimic a browser
     headers = {
@@ -23,9 +25,6 @@ def scrape_netflix_articles(url="https://about.netflix.com/en/newsroom?search=wh
 
         # Find all articles in the news section
         articles = soup.find_all('div', {'data-testid': 'Article'})
-
-        # Initialize a list to store the results
-        articles_data = []
 
         # Iterate through each article
         for article in articles:
