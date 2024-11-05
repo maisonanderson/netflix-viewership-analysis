@@ -75,12 +75,17 @@ def scrape_netflix_articles(url="https://about.netflix.com/en/newsroom?search=wh
     # Create a DataFrame from the collected data
     articles_df = pd.DataFrame(articles_data)
 
-    # Convert 'Date Published' column to proper date format and format it as "Sep 30, 2024"
-    articles_df['Date Published'] = pd.to_datetime(articles_df['Date Published'], errors='coerce')
-    articles_df['Date Published'] = articles_df['Date Published'].dt.strftime('%b %d, %Y')  # Format the date
+    # Check if the DataFrame has any data
+    if not articles_df.empty:
+        # Convert 'Date Published' column to proper date format and format it as "Sep 30, 2024"
+        articles_df['Date Published'] = pd.to_datetime(articles_df['Date Published'], errors='coerce')
+        articles_df['Date Published'] = articles_df['Date Published'].dt.strftime('%b %d, %Y')  # Format the date
 
-    # Sort the DataFrame by 'Date Published' in descending order
-    articles_df = articles_df.sort_values(by='Date Published', ascending=False)[
-        ['Date Published', 'Article Link', 'Excel Link']]
+        # Sort the DataFrame by 'Date Published' in descending order
+        articles_df = articles_df.sort_values(by='Date Published', ascending=False)[
+            ['Date Published', 'Article Link', 'Excel Link']]
+    else:
+        # If there's no data, create an empty DataFrame with the expected columns
+        articles_df = pd.DataFrame(columns=['Date Published', 'Article Link', 'Excel Link'])
 
     return articles_df
