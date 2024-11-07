@@ -13,7 +13,7 @@ st.markdown('<strong>Created by:</strong> [Maison Anderson](https://www.linkedin
 
 article_df = scrape_netflix_articles()
 st.write(articles_df)
-latest_publish = pd.to_datetime(article_df['Date Published']).max()
+# latest_publish = pd.to_datetime(article_df['Date Published']).max()
 
 st.markdown(
     f"""
