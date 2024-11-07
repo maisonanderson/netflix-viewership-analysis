@@ -42,7 +42,7 @@ def scrape_netflix_articles(url="https://about.netflix.com/en/newsroom?search=wh
 
     # Create and format the DataFrame
     articles_df = create_articles_dataframe(articles_data)
-    return articles_df
+    return articles
 
 
 def fetch_article_data(article_link, headers, date_tag, exports_folder):
