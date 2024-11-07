@@ -5,89 +5,81 @@ import pandas as pd
 
 
 def scrape_netflix_articles(url="https://about.netflix.com/en/newsroom?search=what%2520we%2520watched", exports_folder='exports'):
-    # Ensure the exports directory exists
-    print("Current working directory:", os.getcwd())
-    if not os.path.exists(exports_folder):
-        try:
-            os.makedirs(exports_folder, exist_ok=True)
-        except Exception as e:
-            print(f"Failed to create exports directory: {e}")
-            return pd.DataFrame()  # Return an empty DataFrame if folder creation fails
+    # Create the exports directory if it doesn't exist
+    os.makedirs(exports_folder, exist_ok=True)
 
     # Set headers to mimic a browser
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36'
     }
 
-    # Send a GET request to the URL with headers
+    # Send a GET request to the URL
     response = requests.get(url, headers=headers)
 
     # Check if the request was successful
     if response.status_code == 200:
-        # Parse the HTML content using BeautifulSoup
         soup = BeautifulSoup(response.text, 'html.parser')
-
-        # Find all articles in the news section
         articles = soup.find_all('div', {'data-testid': 'Article'})
 
-        # Initialize a list to store the results
+        # Initialize a list to store article data
         articles_data = []
 
-        # Iterate through each article
+        # Process each article
         for article in articles:
-            # Find the title and link
             title_tag = article.find('p', {'data-testid': 'ArticleTitleLink'})
             link_tag = article.find('a', href=True)
             date_tag = article.find('span', {'data-testid': 'ArticleDate'}).text
 
             if title_tag and link_tag:
                 title = title_tag.get_text(strip=True)
-                article_link = "https://about.netflix.com" + link_tag['href']  # Append the base URL to the relative link
+                article_link = "https://about.netflix.com" + link_tag['href']
 
                 # Check if the title contains "What We Watched"
                 if "What We Watched" in title:
-                    # Send a GET request to the article link
-                    article_response = requests.get(article_link, headers=headers)
-                    if article_response.status_code == 200:
-                        article_soup = BeautifulSoup(article_response.text, 'html.parser')
-                        # Find all download links in the article content
-                        all_links = article_soup.find_all('a')
+                    article_data = fetch_article_data(article_link, headers, date_tag, exports_folder)
+                    if article_data:
+                        articles_data.append(article_data)
 
-                        # Iterate through the found links
-                        for link in all_links:
-                            # Check if the 'href' contains '.xlsx' and if the link text is "here"
-                            if link.get('href') and '.xlsx' in link['href'] and link.string == "here":
-                                download_url = link['href']
-
-                                # Construct the full filename to save the file
-                                filename = os.path.basename(download_url)
-                                file_path = os.path.join(exports_folder, filename)
-
-                                # Check if the file already exists
-                                if not os.path.exists(file_path):
-                                    # Download the file if it does not exist
-                                    file_response = requests.get(download_url)
-                                    if file_response.status_code == 200:
-                                        with open(file_path, 'wb') as f:
-                                            f.write(file_response.content)
-
-                                # Append the file, date, and article link information
-                                articles_data.append({
-                                    'File Name': filename,
-                                    'Date Published': date_tag,
-                                    'Article Link': article_link,
-                                    'Excel Link': download_url
-                                })
-
-    # Create a DataFrame from the collected data
-    articles_df = pd.DataFrame(articles_data)
-
-    # Convert 'Date Published' column to proper date format and format it as "Sep 30, 2024"
-    articles_df['Date Published'] = pd.to_datetime(articles_df['Date Published'], errors='coerce')
-    articles_df['Date Published'] = articles_df['Date Published'].dt.strftime('%b %d, %Y')  # Format the date
-
-    # Sort the DataFrame by 'Date Published' in descending order
-    articles_df = articles_df.sort_values(by='Date Published', ascending=False)[
-        ['Date Published', 'Article Link', 'Excel Link']]
-
+    # Create and format the DataFrame
+    articles_df = create_articles_dataframe(articles_data)
     return articles_df
+
+
+def fetch_article_data(article_link, headers, date_tag, exports_folder):
+    """Fetch data from the individual article link."""
+    article_response = requests.get(article_link, headers=headers)
+    if article_response.status_code == 200:
+        article_soup = BeautifulSoup(article_response.text, 'html.parser')
+        all_links = article_soup.find_all('a')
+
+        for link in all_links:
+            if link.get('href') and '.xlsx' in link['href'] and link.string == "here":
+                return download_excel_file(link['href'], date_tag, article_link, exports_folder)
+    return None
+
+
+def download_excel_file(download_url, date_tag, article_link, exports_folder):
+    """Download the Excel file and return the data."""
+    filename = os.path.basename(download_url)
+    file_path = os.path.join(exports_folder, filename)
+
+    # Download the file if it does not exist
+    if not os.path.exists(file_path):
+        file_response = requests.get(download_url)
+        if file_response.status_code == 200:
+            with open(file_path, 'wb') as f:
+                f.write(file_response.content)
+
+    return {
+        'File Name': filename,
+        'Date Published': date_tag,
+        'Article Link': article_link,
+        'Excel Link': download_url
+    }
+
+
+def create_articles_dataframe(articles_data):
+    """Create a DataFrame from the collected data and format the date."""
+    articles_df = pd.DataFrame(articles_data)
+    articles_df['Date Published'] = pd.to_datetime(articles_df['Date Published'], errors='coerce').dt.strftime('%b %d, %Y')
+    return articles_df.sort_values(by='Date Published', ascending=False)[['Date Published', 'Article Link', 'Excel Link']]
