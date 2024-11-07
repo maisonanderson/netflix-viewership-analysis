@@ -4,6 +4,7 @@ import queries
 import pandas as pd
 from datetime import datetime, timedelta
 import requests
+import bs4 as BeautifulSoup
 
 # HEADER
 st.set_page_config(page_title='Netflix Viewership Dashboard', layout='wide')
@@ -12,24 +13,31 @@ st.title('Netflix Viewership Dashboard')
 st.markdown('<strong>Created by:</strong> [Maison Anderson](https://www.linkedin.com/in/maisonanderson/)',
             unsafe_allow_html=True)
 
-
-import streamlit as st
-import requests
-from bs4 import BeautifulSoup
-
 url = "https://about.netflix.com/en/newsroom?search=what%2520we%2520watched"
 headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36'
 }
 
-# Make the GET request
+# URL and headers for the GET request
+url = "https://about.netflix.com/en/newsroom?search=what%2520we%2520watched"
+headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36'
+}
+
+# Send GET request
 response = requests.get(url, headers=headers)
 
-# Parse the HTML content with BeautifulSoup
-soup = BeautifulSoup(response.text, 'html.parser')
+# Initialize soup variable to avoid UnboundLocalError
+soup = None
 
-# Option 1: Display the entire HTML as raw text
-st.write(soup.prettify())  # This formats the HTML nicely
+# Check if the request was successful
+if response.status_code == 200:
+    # Parse the HTML content
+    soup = BeautifulSoup(response.text, 'html.parser')
+    st.write(soup.prettify())  # Display formatted HTML
+else:
+    # If the request fails, show the error status code
+    st.write(f"Request failed with status code: {response.status_code}")
 
 
 # article_df = scrape_netflix_articles()
