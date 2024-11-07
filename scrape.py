@@ -24,26 +24,6 @@ def scrape_netflix_articles(url="https://about.netflix.com/en/newsroom?search=wh
         # Initialize a list to store article data
         articles_data = []
     return articles
-        """
-        # Process each article
-        for article in articles:
-            title_tag = article.find('p', {'data-testid': 'ArticleTitleLink'})
-            link_tag = article.find('a', href=True)
-            date_tag = article.find('span', {'data-testid': 'ArticleDate'}).text
-
-            if title_tag and link_tag:
-                title = title_tag.get_text(strip=True)
-                article_link = "https://about.netflix.com" + link_tag['href']
-
-                # Check if the title contains "What We Watched"
-                if "What We Watched" in title:
-                    article_data = fetch_article_data(article_link, headers, date_tag, exports_folder)
-                    if article_data:
-                        articles_data.append(article_data)
-
-    # Create and format the DataFrame
-    articles_df = create_articles_dataframe(articles_data)
-    return articles"""
 
 
 def fetch_article_data(article_link, headers, date_tag, exports_folder):
