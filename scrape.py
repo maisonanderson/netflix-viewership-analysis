@@ -7,9 +7,6 @@ def scrape_netflix_articles(url="https://about.netflix.com/en/newsroom?search=wh
     # Create the exports directory if it doesn't exist
     os.makedirs(exports_folder, exist_ok=True)
 
-    # Initialize a list to store the results
-    articles_data = []
-
     # Set headers to mimic a browser
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36'
@@ -26,14 +23,17 @@ def scrape_netflix_articles(url="https://about.netflix.com/en/newsroom?search=wh
         # Find all articles in the news section
         articles = soup.find_all('div', {'data-testid': 'Article'})
 
+        # Initialize a list to store the results
+        articles_data = []
+
         # Iterate through each article
         for article in articles:
             # Find the title and link
             title_tag = article.find('p', {'data-testid': 'ArticleTitleLink'})
             link_tag = article.find('a', href=True)
-            date_tag = article.find('span', {'data-testid': 'ArticleDate'}).text
+            date_tag = article.find('span', {'data-testid': 'ArticleDate'}).text if article.find('span', {'data-testid': 'ArticleDate'}) else None
 
-            if title_tag and link_tag:
+            if title_tag and link_tag and date_tag:
                 title = title_tag.get_text(strip=True)
                 article_link = "https://about.netflix.com" + link_tag['href']  # Append the base URL to the relative link
 
@@ -72,11 +72,15 @@ def scrape_netflix_articles(url="https://about.netflix.com/en/newsroom?search=wh
                                     'Excel Link': download_url
                                 })
 
+    # Check if any articles were found
+    if not articles_data:
+        print("No articles matching 'What We Watched' were found.")
+    
     # Create a DataFrame from the collected data
     articles_df = pd.DataFrame(articles_data)
 
-    # Check if the DataFrame has any data
-    if not articles_df.empty:
+    # Ensure 'Date Published' exists before converting and formatting it
+    if 'Date Published' in articles_df.columns:
         # Convert 'Date Published' column to proper date format and format it as "Sep 30, 2024"
         articles_df['Date Published'] = pd.to_datetime(articles_df['Date Published'], errors='coerce')
         articles_df['Date Published'] = articles_df['Date Published'].dt.strftime('%b %d, %Y')  # Format the date
@@ -85,7 +89,9 @@ def scrape_netflix_articles(url="https://about.netflix.com/en/newsroom?search=wh
         articles_df = articles_df.sort_values(by='Date Published', ascending=False)[
             ['Date Published', 'Article Link', 'Excel Link']]
     else:
-        # If there's no data, create an empty DataFrame with the expected columns
-        articles_df = pd.DataFrame(columns=['Date Published', 'Article Link', 'Excel Link'])
+        print("No 'Date Published' column found in articles_df.")
+
+    # Print articles_df columns for verification
+    print("Articles DataFrame columns:", articles_df.columns)
 
     return articles_df
