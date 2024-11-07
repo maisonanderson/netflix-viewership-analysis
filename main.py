@@ -13,18 +13,27 @@ st.markdown('<strong>Created by:</strong> [Maison Anderson](https://www.linkedin
             unsafe_allow_html=True)
 
 
-url="https://about.netflix.com/en/newsroom?search=what%2520we%2520watched"
+import streamlit as st
+import requests
+from bs4 import BeautifulSoup
+
+url = "https://about.netflix.com/en/newsroom?search=what%2520we%2520watched"
 headers = {
-'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36'
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36'
 }
 
+# Make the GET request
 response = requests.get(url, headers=headers)
-soup = BeautifulSoup(response.text, 'html.parser')
-# articles = soup.find_all('div', {'data-testid': 'Article'})
-st.write(soup)
 
-article_df = scrape_netflix_articles()
-st.write(articles_df)
+# Parse the HTML content with BeautifulSoup
+soup = BeautifulSoup(response.text, 'html.parser')
+
+# Option 1: Display the entire HTML as raw text
+st.write(soup.prettify())  # This formats the HTML nicely
+
+
+# article_df = scrape_netflix_articles()
+# st.write(articles_df)
 # latest_publish = pd.to_datetime(article_df['Date Published']).max()
 
 st.markdown(
