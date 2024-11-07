@@ -23,7 +23,8 @@ def scrape_netflix_articles(url="https://about.netflix.com/en/newsroom?search=wh
 
         # Initialize a list to store article data
         articles_data = []
-
+        return articles
+        """
         # Process each article
         for article in articles:
             title_tag = article.find('p', {'data-testid': 'ArticleTitleLink'})
@@ -42,7 +43,7 @@ def scrape_netflix_articles(url="https://about.netflix.com/en/newsroom?search=wh
 
     # Create and format the DataFrame
     articles_df = create_articles_dataframe(articles_data)
-    return articles
+    return articles"""
 
 
 def fetch_article_data(article_link, headers, date_tag, exports_folder):
