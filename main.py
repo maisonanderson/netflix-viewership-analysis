@@ -3,6 +3,7 @@ from scrape import scrape_netflix_articles
 import queries
 import pandas as pd
 from datetime import datetime, timedelta
+import requests
 
 # HEADER
 st.set_page_config(page_title='Netflix Viewership Dashboard', layout='wide')
@@ -10,6 +11,17 @@ st.set_page_config(page_title='Netflix Viewership Dashboard', layout='wide')
 st.title('Netflix Viewership Dashboard')
 st.markdown('<strong>Created by:</strong> [Maison Anderson](https://www.linkedin.com/in/maisonanderson/)',
             unsafe_allow_html=True)
+
+
+url="https://about.netflix.com/en/newsroom?search=what%2520we%2520watched"
+headers = {
+'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36'
+}
+
+response = requests.get(url, headers=headers)
+soup = BeautifulSoup(response.text, 'html.parser')
+# articles = soup.find_all('div', {'data-testid': 'Article'})
+st.write(soup)
 
 article_df = scrape_netflix_articles()
 st.write(articles_df)
