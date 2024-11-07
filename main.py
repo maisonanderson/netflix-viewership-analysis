@@ -19,7 +19,7 @@ st.markdown(
     On December 12, 2023, Netflix made history as the first streaming service to release comprehensive viewership data 
     for its entire catalog. This dashboard provides high-level insights into Netflix’s viewership trends from all data 
     releases since the initial publication. Each time this page loads, it checks for new data updates, with the latest 
-    release published on {latest_publish.strftime('%B %d, %Y')}. For more details on previous data releases, please 
+    release published on September 19, 2024. For more details on previous data releases, please 
     refer to the Info section at the bottom of this page, which also includes a list of the key assumptions made during 
     data processing.
     """
