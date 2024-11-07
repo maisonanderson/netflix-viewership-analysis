@@ -5,8 +5,13 @@ import pandas as pd
 
 
 def scrape_netflix_articles(url="https://about.netflix.com/en/newsroom?search=what%2520we%2520watched", exports_folder='exports'):
-    # Create the exports directory if it doesn't exist
-    os.makedirs(exports_folder, exist_ok=True)
+    # Ensure the exports directory exists
+    if not os.path.exists(exports_folder):
+        try:
+            os.makedirs(exports_folder, exist_ok=True)
+        except Exception as e:
+            print(f"Failed to create exports directory: {e}")
+            return pd.DataFrame()  # Return an empty DataFrame if folder creation fails
 
     # Set headers to mimic a browser
     headers = {
