@@ -23,7 +23,7 @@ def scrape_netflix_articles(url="https://about.netflix.com/en/newsroom?search=wh
 
         # Initialize a list to store article data
         articles_data = []
-        return articles
+    return articles
         """
         # Process each article
         for article in articles:
