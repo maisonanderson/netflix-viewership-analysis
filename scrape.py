@@ -6,6 +6,7 @@ import pandas as pd
 
 def scrape_netflix_articles(url="https://about.netflix.com/en/newsroom?search=what%2520we%2520watched", exports_folder='exports'):
     # Ensure the exports directory exists
+    print("Current working directory:", os.getcwd())
     if not os.path.exists(exports_folder):
         try:
             os.makedirs(exports_folder, exist_ok=True)
