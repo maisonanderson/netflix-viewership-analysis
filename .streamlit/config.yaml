@@ -1,0 +1,86 @@
+name: netflix_viewership_dashboard
+
+dependencies:
+  - python=3.12.5  # Your specified Python version
+  - pip:
+      - streamlit
+      - pandas
+      - altair
+      - numpy
+      - datetime
+      - re
+      - beautifulsoup4
+      - requests
+      - matplotlib  # Include this if you're using matplotlib for any visualization
+
+files:
+  - main.py: |
+      import streamlit as st
+      from scrape import scrape_netflix_articles
+      import queries
+      import pandas as pd
+      from datetime import datetime, timedelta
+
+      # Streamlit page configuration
+      st.set_page_config(page_title='Netflix Viewership Dashboard', layout='wide')
+
+      st.title('Netflix Viewership Dashboard')
+      st.markdown('<strong>Created by:</strong> [Maison Anderson](https://www.linkedin.com/in/maisonanderson/)',
+                  unsafe_allow_html=True)
+
+      # Get articles data
+      article_df = scrape_netflix_articles()
+      latest_publish = pd.to_datetime(article_df['Date Published']).max()
+
+      if pd.isna(latest_publish):
+          latest_publish_text = "an unknown date"
+      else:
+          latest_publish_text = latest_publish.strftime('%B %d, %Y')
+
+      st.markdown(
+          f"""
+          On December 12, 2023, Netflix made history as the first streaming service to release comprehensive viewership data 
+          for its entire catalog. This dashboard provides high-level insights into Netflix’s viewership trends from all data 
+          releases since the initial publication. Each time this page loads, it checks for new data updates, with the latest 
+          release published on {latest_publish.strftime('%B %d, %Y')}. For more details on previous data releases, please 
+          refer to the Info section at the bottom of this page, which also includes a list of the key assumptions made during 
+          data processing.
+          """
+      )
+
+      # Add more code logic for handling data visualization, grouping, etc.
+
+  - queries.py: |
+      import pandas as pd
+      import altair as alt
+      import streamlit as st
+      import data
+
+      # Function definitions for data manipulation and querying
+      def process_fiscal_half(df):
+          # Function to group and process fiscal half data
+          pass
+      
+      # Other functions used for querying and processing
+
+  - data.py: |
+      import os
+      import re
+      import pandas as pd
+      import numpy as np
+      from scrape import scrape_netflix_articles
+
+      # Function to clean and process Netflix engagement data
+      def clean_engagement_data(df):
+          # Data cleaning function
+          pass
+
+      # Add more functions for data processing
+
+run:
+  - main  # The entry point for running your Streamlit app
+
+streamlit:
+  server:
+    headless: true
+    enableCORS: false  # This may be needed for some integrations
