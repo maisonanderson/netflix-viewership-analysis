@@ -3,6 +3,7 @@ import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 
+
 def scrape_netflix_articles(url="https://about.netflix.com/en/newsroom?search=what%2520we%2520watched", exports_folder='exports'):
     # Create the exports directory if it doesn't exist
     os.makedirs(exports_folder, exist_ok=True)
@@ -31,9 +32,9 @@ def scrape_netflix_articles(url="https://about.netflix.com/en/newsroom?search=wh
             # Find the title and link
             title_tag = article.find('p', {'data-testid': 'ArticleTitleLink'})
             link_tag = article.find('a', href=True)
-            date_tag = article.find('span', {'data-testid': 'ArticleDate'}).text if article.find('span', {'data-testid': 'ArticleDate'}) else None
+            date_tag = article.find('span', {'data-testid': 'ArticleDate'}).text
 
-            if title_tag and link_tag and date_tag:
+            if title_tag and link_tag:
                 title = title_tag.get_text(strip=True)
                 article_link = "https://about.netflix.com" + link_tag['href']  # Append the base URL to the relative link
 
@@ -72,26 +73,15 @@ def scrape_netflix_articles(url="https://about.netflix.com/en/newsroom?search=wh
                                     'Excel Link': download_url
                                 })
 
-    # Check if any articles were found
-    if not articles_data:
-        print("No articles matching 'What We Watched' were found.")
-    
     # Create a DataFrame from the collected data
     articles_df = pd.DataFrame(articles_data)
 
-    # Ensure 'Date Published' exists before converting and formatting it
-    if 'Date Published' in articles_df.columns:
-        # Convert 'Date Published' column to proper date format and format it as "Sep 30, 2024"
-        articles_df['Date Published'] = pd.to_datetime(articles_df['Date Published'], errors='coerce')
-        articles_df['Date Published'] = articles_df['Date Published'].dt.strftime('%b %d, %Y')  # Format the date
+    # Convert 'Date Published' column to proper date format and format it as "Sep 30, 2024"
+    articles_df['Date Published'] = pd.to_datetime(articles_df['Date Published'], errors='coerce')
+    articles_df['Date Published'] = articles_df['Date Published'].dt.strftime('%b %d, %Y')  # Format the date
 
-        # Sort the DataFrame by 'Date Published' in descending order
-        articles_df = articles_df.sort_values(by='Date Published', ascending=False)[
-            ['Date Published', 'Article Link', 'Excel Link']]
-    else:
-        print("No 'Date Published' column found in articles_df.")
-
-    # Print articles_df columns for verification
-    print("Articles DataFrame columns:", articles_df.columns)
+    # Sort the DataFrame by 'Date Published' in descending order
+    articles_df = articles_df.sort_values(by='Date Published', ascending=False)[
+        ['Date Published', 'Article Link', 'Excel Link']]
 
     return articles_df
