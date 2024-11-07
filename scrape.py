@@ -10,7 +10,7 @@ def scrape_netflix_articles(url="https://about.netflix.com/en/newsroom?search=wh
 
     # Set headers to mimic a browser
     headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36'
     }
 
     # Send a GET request to the URL
