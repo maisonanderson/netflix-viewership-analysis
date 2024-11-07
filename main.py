@@ -1,36 +1,29 @@
-import streamlit as st
-import requests
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from bs4 import BeautifulSoup
+import streamlit as st
 
-# URL and headers for the GET request
+# Set up headless mode for Selenium
+chrome_options = Options()
+chrome_options.add_argument("--headless")  # Ensure that the browser runs in headless mode
+chrome_options.add_argument("--no-sandbox")  # Useful for Docker or certain environments
+chrome_options.add_argument("--disable-dev-shm-usage")
+
+# Specify the path to your chromedriver
+driver = webdriver.Chrome(executable_path="path_to_your_chromedriver", options=chrome_options)
+
+# Open the page in Selenium
 url = "https://about.netflix.com/en/newsroom?search=what%2520we%2520watched"
-headers = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36',
-    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-    'Accept-Encoding': 'gzip, deflate, br',
-    'Accept-Language': 'en-GB,en;q=0.9,en-US;q=0.8',
-    'Connection': 'keep-alive',
-    'Upgrade-Insecure-Requests': '1'
-}
+driver.get(url)
 
-# Send GET request
-response = requests.get(url, headers=headers)
+# Give the page some time to load if needed (adjust sleep time)
+driver.implicitly_wait(10)
 
-# Debugging: print response status code
-st.write(f"Response Status Code: {response.status_code}")
+# Get the page source and parse it with BeautifulSoup
+soup = BeautifulSoup(driver.page_source, 'html.parser')
 
-# Check if the request was successful
-if response.status_code == 200:
-    # Parse the HTML content
-    soup = BeautifulSoup(response.text, 'html.parser')
-    st.write(soup.prettify())  # Display formatted HTML
-else:
-    # If the request fails, show the error status code
-    st.write(f"Request failed with status code: {response.status_code}")
-    soup = None
+# Display the page content in Streamlit
+st.write(soup.prettify())  # Pretty print the HTML content
 
-# Additional check to make sure soup is properly initialized
-if soup:
-    st.write("Soup is initialized successfully.")
-else:
-    st.write("Soup is not initialized.")
+# Close the driver
+driver.quit()
