@@ -3,18 +3,14 @@ import re
 import pandas as pd
 import numpy as np
 
-from scrape import scrape_netflix_articles
 
-scrape_netflix_articles()
-
+# HELPER VARIABLES
 folder_path = 'exports'
 
-# Empty dataframes
 film_data = pd.DataFrame()
 tv_data = pd.DataFrame()
 engagement_data = pd.DataFrame()
 
-# Exceptions dictionary for manual handling
 group_title_exceptions = {
     "Bright: Samurai Soul // ブライト: サムライソウル": "Bright: Samurai Soul",
     "Pokémon the Movie: Secrets of the Jungle": "Pokémon",
@@ -26,7 +22,7 @@ licensed_exceptions = {
 }
 
 
-# Helper functions
+# HELPER FUNCTIONS
 def extract_dates_from_filename(filename):
     """Extract start and end dates from file name."""
     match = re.search(r'(\d{4})(Jan-Jun|Jul-Dec)', filename)
@@ -72,7 +68,7 @@ def determine_ownership(title, release_date):
     return licensed_exceptions.get(title, "Licensed" if pd.isnull(release_date) else "Original")
 
 
-# Data processing functions
+# DATA PROCESSING FUNCTIONS
 def process_sheet(file_path, sheet_name, start_date, end_date):
     """Read and process Film, TV, or Engagement sheet."""
     try:
@@ -112,6 +108,7 @@ def process_files_in_folder(folder_path):
 def clean_initial_publish(initial_publish, helper_data):
     """Clean engagement data by filling missing media and runtime values."""
     helper_data = helper_data.drop_duplicates(['Title'])
+    print(helper_data)
     initial_publish = initial_publish.merge(helper_data[['Title', 'Media', 'Runtime in Minutes']], on='Title',
                                             how='left')
 
@@ -152,9 +149,6 @@ process_files_in_folder(folder_path)
 
 # Combine film and TV data to merge with engagement data
 combined_helper = pd.concat([film_data, tv_data], ignore_index=True)
-
-print(engagement_data.head())
-print(combined_helper.head())
 
 # Clean engagement data
 engagement_data = clean_initial_publish(engagement_data, combined_helper)
