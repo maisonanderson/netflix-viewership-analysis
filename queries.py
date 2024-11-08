@@ -1,7 +1,14 @@
 import pandas as pd
 import altair as alt
+import os
 import streamlit as st
 import data
+
+
+# FILE UPLOAD
+excel_files = [file for file in os.listdir(data.folder_path) if file.endswith('.xlsx')]
+excel_files.sort(reverse=True)
+excel_files_df = pd.DataFrame(excel_files, columns=['Excel Files In Use'])
 
 
 # VISUALIZATION #1
@@ -80,8 +87,15 @@ def get_fiscal_half(start_date, end_date):
         return f"H2 {start_year}"
 
 
-@st.cache_data
-def add_fiscal_half_and_views(df, media_type):
+def get_latest_publish_time():
+    """Get the latest publish time from the data to check for updates."""
+    # Assuming 'data.film_data' and 'data.tv_data' have a 'Start Date' column
+    latest_film_time = data.film_data['Start Date'].max()
+    latest_tv_time = data.tv_data['Start Date'].max()
+    return max(latest_film_time, latest_tv_time)
+
+
+def add_fiscal_half_and_views(df, media_type, latest_publish_time):
     """Add Media, Fiscal Half columns and calculate Views based on Hours Viewed and Runtime."""
     df['Media'] = media_type
     df['Fiscal Half'] = df.apply(
@@ -92,11 +106,14 @@ def add_fiscal_half_and_views(df, media_type):
     return df
 
 
-@st.cache_data
 def create_fiscal_half_chart(column_choice):
+    """Create and return the fiscal half chart."""
+    # Get latest data publish time to ensure proper cache invalidation
+    latest_publish_time = get_latest_publish_time()
+
     # Prepare data with chosen column
-    film_data_with_fiscal_half = add_fiscal_half_and_views(data.film_data, 'Film')
-    tv_data_with_fiscal_half = add_fiscal_half_and_views(data.tv_data, 'TV')
+    film_data_with_fiscal_half = add_fiscal_half_and_views(data.film_data, 'Film', latest_publish_time)
+    tv_data_with_fiscal_half = add_fiscal_half_and_views(data.tv_data, 'TV', latest_publish_time)
 
     combined_data = pd.concat([film_data_with_fiscal_half, tv_data_with_fiscal_half])
 
